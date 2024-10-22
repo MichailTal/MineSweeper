@@ -41,11 +41,26 @@ int main()
 				grid[i][j] = (Cell)
 				{
 					.i = i,
-					.j = j
+					.j = j,
+          .containsMine = false,
+          .revealed = true
 				};
 
 			}
 		}
+
+    int minesToPlace = (int)(ROWS * COLS * 0.1f);
+    while (minesToPlace > 0) {
+        int i = rand() % COLS;
+        int j = rand() % ROWS;
+
+        if(!grid[i][j].containsMine)
+        {
+          grid[i][j].containsMine = true;
+          minesToPlace--;
+        }
+    }
+
 
 		while(!WindowShouldClose())
 		{
