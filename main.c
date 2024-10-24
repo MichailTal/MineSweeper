@@ -127,7 +127,10 @@ void CellDraw(Cell cell)
 		else
 		{
 			DrawRectangle(cell.i * cellWidth, cell.j * cellHeight, cellWidth, cellHeight, LIGHTGRAY);
-			DrawText(TextFormat("%d", cell.nearbyMines), cell.i * cellWidth + 6, cell.j * cellHeight + 4, cellHeight - 10, DARKGRAY);
+			if (cell.nearbyMines > 0)
+			{
+				DrawText(TextFormat("%d", cell.nearbyMines), cell.i * cellWidth + 12, cell.j * cellHeight + 4, cellHeight - 10, DARKGRAY);
+			}	
 		}	
 
 	}	
