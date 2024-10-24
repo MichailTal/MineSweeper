@@ -19,6 +19,7 @@ typedef struct Cell
 	int j;
 	bool containsMine;
 	bool revealed;
+	int nearbyMines;
 
 } Cell;
 
@@ -27,6 +28,7 @@ Cell grid[COLS][ROWS];
 void CellDraw(Cell);
 bool IndexIsValid(int, int);
 void CellReveal(int, int);
+int CellCountMines(int, int);
 
 int main()
 {
@@ -42,8 +44,10 @@ int main()
 				{
 					.i = i,
 					.j = j,
-          .containsMine = false,
-          .revealed = true
+					.containsMine = false,
+					.revealed = false,
+					.nearbyMines = -1,
+
 				};
 
 			}
@@ -60,6 +64,17 @@ int main()
           minesToPlace--;
         }
     }
+
+		for (int i = 0; i < COLS; i++)
+		{
+			for(int j = 0; j < ROWS; j++)
+			{
+				if(!grid[i][j].containsMine)
+				{
+					grid[i][j].nearbyMines = CellCountMines(i, j);
+				}	
+			}
+		}
 
 
 		while(!WindowShouldClose())
@@ -112,6 +127,7 @@ void CellDraw(Cell cell)
 		else
 		{
 			DrawRectangle(cell.i * cellWidth, cell.j * cellHeight, cellWidth, cellHeight, LIGHTGRAY);
+			DrawText(TextFormat("%d", cell.nearbyMines), cell.i * cellWidth + 6, cell.j * cellHeight + 4, cellHeight - 10, DARKGRAY);
 		}	
 
 	}	
@@ -123,6 +139,34 @@ bool IndexIsValid(int i, int j)
 {
 	return i >= 0 && i < COLS && j >= 0 && j < ROWS;  
 }
+
+
+int CellCountMines(int i, int j)
+{
+	int count = 0;
+	for (int iOff= -1; iOff <= 1; iOff++)
+	{
+		for (int jOff = -1; jOff <= 1; jOff++)
+		{
+			if (iOff == 0 && jOff == 0)
+			{
+				continue;
+			}
+			
+			if (!IndexIsValid(i + iOff, j + jOff))
+			{
+				continue;
+			}
+			
+			if (grid[i + iOff][j + jOff].containsMine)
+			{	
+				count++;
+			}
+		}	
+	}
+
+	return count;
+}	
 
 void CellReveal(int i, int j)
 {
