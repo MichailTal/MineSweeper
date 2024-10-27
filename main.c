@@ -14,6 +14,9 @@ const int screenHeight = 400;
 const int cellWidth = screenWidth / COLS;
 const int cellHeight = screenWidth / ROWS;
 
+const char* youLose = "YOU LOSE";
+const char* pressRToReplay = "Press 'r' to replay";
+const char* youWin = "YOU WIN";
 typedef struct Cell {
   int i;
   int j;
@@ -35,6 +38,18 @@ void CellFlag(int, int);
 int CellCountMines(int, int);
 void GridInit(void);
 void GridFloodClearFrom(int , int);
+void GameInit(void);
+
+typedef enum GameState
+{
+	PLAYING,
+	WIN,
+	LOOSE,
+} GameState;
+
+GameState state;
+int tilesRevealed;
+int minesPresent;
 
 int main() {
   srand(time(0));
@@ -43,7 +58,7 @@ int main() {
 
   flagSprite = LoadTexture("resources/flag.png");
 
-  GridInit();
+  GameInit();
 
   while (!WindowShouldClose()) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -51,7 +66,7 @@ int main() {
       int indexI = mPos.x / cellWidth;
       int indexJ = mPos.y / cellHeight;
 
-      if (IndexIsValid(indexI, indexJ)) {
+      if (state  == PLAYING && IndexIsValid(indexI, indexJ)) {
         CellReveal(indexI, indexJ);
       }
     }
@@ -61,10 +76,14 @@ int main() {
       int indexI = mPos.x / cellWidth;
       int indexJ = mPos.y / cellHeight;
 
-      if (IndexIsValid(indexI, indexJ)) {
+      if (state == PLAYING && IndexIsValid(indexI, indexJ)) {
         CellFlag(indexI, indexJ);
       }
     }
+	if (IsKeyPressed(KEY_R))
+	{
+		GameInit();
+	}	
 
     BeginDrawing();
 
@@ -74,8 +93,20 @@ int main() {
       for (int j = 0; j < ROWS; j++) {
         CellDraw(grid[i][j]);
       }
-    }
+	}  
+	if (state == LOOSE)
+	{
+		DrawRectangle(0, 0, screenWidth, screenHeight, Fade(WHITE, 0.8f));
+		DrawText(youLose, screenWidth / 2 - MeasureText(youLose, 20) / 2, screenHeight / 2 - 10, 20, DARKGRAY);
+		DrawText(pressRToReplay, screenWidth / 2 - MeasureText(pressRToReplay, 20) / 2, screenHeight * 0.75f, 20, DARKGRAY);
+	}	
 
+	if (state == WIN)
+	{
+		DrawRectangle(0, 0, screenWidth, screenHeight, Fade(WHITE, 0.8f));
+		DrawText(youWin, screenWidth / 2 - MeasureText(youWin, 20) / 2, screenHeight / 2 - 10, 20, DARKGRAY);
+		DrawText(pressRToReplay, screenWidth / 2 - MeasureText(pressRToReplay, 20) / 2, screenHeight * 0.75f, 20, DARKGRAY);
+	}	
     EndDrawing();
   }
 
@@ -100,7 +131,8 @@ void GridInit(void) {
     }
   }
 
-  int minesToPlace = (int)(ROWS * COLS * 0.1f);
+  minesPresent = (int)(ROWS * COLS * 0.1f);
+  int minesToPlace = minesPresent;
   while (minesToPlace > 0) {
     int i = rand() % COLS;
     int j = rand() % ROWS;
@@ -182,7 +214,7 @@ void CellReveal(int i, int j) {
   grid[i][j].revealed = true;
 
   if (grid[i][j].containsMine) {
-    // lose!
+	state = LOOSE;
   } else {
     // play sound
 	
@@ -190,6 +222,13 @@ void CellReveal(int i, int j) {
 
 		GridFloodClearFrom(i ,j);
 	}
+
+	tilesRevealed ++;
+
+	if (tilesRevealed == ROWS * COLS - minesPresent)
+	{
+		state = WIN;
+	}	
   }
 }
 
@@ -221,4 +260,11 @@ void GridFloodClearFrom(int i, int j)
 		  }
 		}
 	}
+}
+
+void GameInit()
+{
+	GridInit();
+	state = PLAYING;
+	tilesRevealed = 0;
 }
