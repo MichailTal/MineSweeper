@@ -33,6 +33,7 @@ bool IndexIsValid(int, int);
 void CellReveal(int, int);
 void CellFlag(int, int);
 int CellCountMines(int, int);
+void GridInit(void);
 
 int main() {
   srand(time(0));
@@ -86,7 +87,6 @@ int main() {
     }
     else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
     {
-      printf("Right Mouse Button Pressed");
       Vector2 mPos = GetMousePosition();
       int indexI = mPos.x / cellWidth;
       int indexJ = mPos.y / cellHeight;
@@ -114,6 +114,42 @@ int main() {
   return 0;
 }
 
+void GridInit() {
+	
+  for (int i = 0; i < COLS; i++) {
+    for (int j = 0; j < ROWS; j++) {
+      grid[i][j] = (Cell){
+          .i = i,
+          .j = j,
+          .containsMine = false,
+          .revealed = false,
+          .nearbyMines = -1,
+          .flagged = false,
+
+      };
+    }
+  }
+
+  int minesToPlace = (int)(ROWS * COLS * 0.1f);
+  while (minesToPlace > 0) {
+    int i = rand() % COLS;
+    int j = rand() % ROWS;
+
+    if (!grid[i][j].containsMine) {
+      grid[i][j].containsMine = true;
+      minesToPlace--;
+    }
+  }
+
+  for (int i = 0; i < COLS; i++) {
+    for (int j = 0; j < ROWS; j++) {
+      if (!grid[i][j].containsMine) {
+        grid[i][j].nearbyMines = CellCountMines(i, j);
+      }
+    }
+  }
+}
+
 void CellDraw(Cell cell) {
   if (cell.revealed) {
     if (cell.containsMine) {
@@ -134,7 +170,7 @@ void CellDraw(Cell cell) {
     Rectangle dest = {cell.i * cellWidth, cell.j * cellHeight, cellWidth, cellHeight};
     Vector2 origin = {0, 0};
 
-    DrawTexturePro(flagSprite, source, dest, origin ,0.0f, Fade(WHITE, 0.03f));
+    DrawTexturePro(flagSprite, source, dest, origin ,0.0f, Fade(WHITE, 1.0f));
   }
 
   DrawRectangleLines(cell.i * cellWidth, cell.j * cellHeight, cellWidth,
