@@ -34,6 +34,7 @@ void CellReveal(int, int);
 void CellFlag(int, int);
 int CellCountMines(int, int);
 void GridInit(void);
+void GridFloodClearFrom(int , int);
 
 int main() {
   srand(time(0));
@@ -184,6 +185,11 @@ void CellReveal(int i, int j) {
     // lose!
   } else {
     // play sound
+	
+	if (grid[i][j].nearbyMines == 0) {
+
+		GridFloodClearFrom(i ,j);
+	}
   }
 }
 
@@ -196,3 +202,23 @@ void CellFlag(int i, int j)
   grid[i][j].flagged = !grid[i][j].flagged;
 }
 
+
+void GridFloodClearFrom(int i, int j)
+{
+	
+    for (int iOff = -1; iOff <= 1; iOff++) {
+		for (int jOff = -1; jOff <= 1; jOff++) {
+		  if (iOff == 0 && jOff == 0) {
+			continue;
+		  }
+
+		  if (!IndexIsValid(i + iOff, j + jOff)) {
+			continue;
+		  }
+
+		  if (!grid[i + iOff][j + jOff].revealed) {
+			  CellReveal(i + iOff, j + jOff);
+		  }
+		}
+	}
+}
