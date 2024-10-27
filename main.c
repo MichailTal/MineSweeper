@@ -31,6 +31,15 @@ Cell grid[COLS][ROWS];
 
 Texture2D flagSprite;
 
+typedef enum GameState
+{
+	PLAYING,
+	WIN,
+	LOOSE,
+} GameState;
+
+GameState state;
+
 void CellDraw(Cell);
 bool IndexIsValid(int, int);
 void CellReveal(int, int);
@@ -40,16 +49,10 @@ void GridInit(void);
 void GridFloodClearFrom(int , int);
 void GameInit(void);
 
-typedef enum GameState
-{
-	PLAYING,
-	WIN,
-	LOOSE,
-} GameState;
-
-GameState state;
 int tilesRevealed;
 int minesPresent;
+float timeGameStarted;
+float timeGameEnded;
 
 int main() {
   srand(time(0));
@@ -99,6 +102,11 @@ int main() {
 		DrawRectangle(0, 0, screenWidth, screenHeight, Fade(WHITE, 0.8f));
 		DrawText(youLose, screenWidth / 2 - MeasureText(youLose, 20) / 2, screenHeight / 2 - 10, 20, DARKGRAY);
 		DrawText(pressRToReplay, screenWidth / 2 - MeasureText(pressRToReplay, 20) / 2, screenHeight * 0.75f, 20, DARKGRAY);
+
+		int minutes = (int)(timeGameEnded - timeGameStarted) / 60;
+		int seconds = (int)(timeGameEnded - timeGameStarted) % 60;
+			
+		DrawText(TextFormat("Time played: %d minutes, %d seconds.", minutes, seconds), 20, screenHeight - 40, 20, DARKGRAY);
 	}	
 
 	if (state == WIN)
@@ -106,6 +114,11 @@ int main() {
 		DrawRectangle(0, 0, screenWidth, screenHeight, Fade(WHITE, 0.8f));
 		DrawText(youWin, screenWidth / 2 - MeasureText(youWin, 20) / 2, screenHeight / 2 - 10, 20, DARKGRAY);
 		DrawText(pressRToReplay, screenWidth / 2 - MeasureText(pressRToReplay, 20) / 2, screenHeight * 0.75f, 20, DARKGRAY);
+
+		int minutes = (int)(timeGameEnded - timeGameStarted) / 60;
+		int seconds = (int)(timeGameEnded - timeGameStarted) % 60;
+
+		DrawText(TextFormat("Time played: %d minutes, %d seconds.", minutes, seconds), 20, screenHeight - 40, 20, DARKGRAY);
 	}	
     EndDrawing();
   }
@@ -215,6 +228,7 @@ void CellReveal(int i, int j) {
 
   if (grid[i][j].containsMine) {
 	state = LOOSE;
+	timeGameEnded = GetTime();
   } else {
     // play sound
 	
@@ -228,6 +242,7 @@ void CellReveal(int i, int j) {
 	if (tilesRevealed == ROWS * COLS - minesPresent)
 	{
 		state = WIN;
+		timeGameEnded = GetTime();
 	}	
   }
 }
@@ -267,4 +282,5 @@ void GameInit()
 	GridInit();
 	state = PLAYING;
 	tilesRevealed = 0;
+	timeGameStarted = GetTime();
 }
