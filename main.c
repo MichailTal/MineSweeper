@@ -42,38 +42,7 @@ int main() {
 
   flagSprite = LoadTexture("resources/flag.png");
 
-  for (int i = 0; i < COLS; i++) {
-    for (int j = 0; j < ROWS; j++) {
-      grid[i][j] = (Cell){
-          .i = i,
-          .j = j,
-          .containsMine = false,
-          .revealed = false,
-          .nearbyMines = -1,
-          .flagged = false,
-
-      };
-    }
-  }
-
-  int minesToPlace = (int)(ROWS * COLS * 0.1f);
-  while (minesToPlace > 0) {
-    int i = rand() % COLS;
-    int j = rand() % ROWS;
-
-    if (!grid[i][j].containsMine) {
-      grid[i][j].containsMine = true;
-      minesToPlace--;
-    }
-  }
-
-  for (int i = 0; i < COLS; i++) {
-    for (int j = 0; j < ROWS; j++) {
-      if (!grid[i][j].containsMine) {
-        grid[i][j].nearbyMines = CellCountMines(i, j);
-      }
-    }
-  }
+  GridInit();
 
   while (!WindowShouldClose()) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -114,7 +83,7 @@ int main() {
   return 0;
 }
 
-void GridInit() {
+void GridInit(void) {
 	
   for (int i = 0; i < COLS; i++) {
     for (int j = 0; j < ROWS; j++) {
